@@ -44,7 +44,7 @@ Esta é uma API REST robusta desenvolvida para a gestão de um sistema de blog. 
 1. Clone o repositório:
 
    ```bash
-   git clone https://github.com/teu-utilizador/teu-repositorio.git
+   git clone https://github.com/Afonsojlc/API_Rest-Sistema_de_Blog_em_Node.js
    ```
 
 2. Instale as dependências:
