@@ -1,29 +1,27 @@
-
+﻿// Centralized Express error-handling middleware
 const errorHandler = (err, req, res, next) => {
-console.error(err.stack);
+    console.error('Error Trace:', err.stack || err.message);
 
-// Erro de ID inválido do Mongoose
-if (err.name === 'CastError') {
-    return res.status(400).json({ erro: 'ID inválido' });
-}
+    // Mongoose Invalid ObjectId Error (CastError)
+    if (err.name === 'CastError') {
+        return res.status(400).json({ erro: 'Resource not found: Invalid ID format' });
+    }
 
-// Erro de duplicado (ex: email já existe)
-if (err.code === 11000) {
-    const campo = Object.keys(err.keyValue)[0];
-    return res.status(400).json(
-    { erro: `${campo} já está em uso` }
-    );
-}
+    // Mongoose Duplicate Key Error (code 11000, e.g. email uniqueness)
+    if (err.code === 11000) {
+        const field = Object.keys(err.keyValue)[0];
+        return res.status(400).json({ erro: `Field '${field}' is already in use` });
+    }
 
-// Erro de validação do Mongoose
-if (err.name === 'ValidationError') {
-    const msgs = Object.values(err.errors).map(e => e.message);
-    return res.status(400).json({ erro: msgs.join(', ') });
-}
+    // Mongoose Validation Error (Schema constraint failure)
+    if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(e => e.message);
+        return res.status(400).json({ erro: messages.join(', ') });
+    }
 
-// Erro genérico
-res.status(err.statusCode || 500).json({
-    erro: err.message || 'Erro interno do servidor'
+    // Generic Internal Server Error
+    res.status(err.statusCode || 500).json({
+        erro: err.message || 'Internal server error'
     });
 };
 

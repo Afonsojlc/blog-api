@@ -1,33 +1,52 @@
-const express = require('express');
+﻿const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db'); // Ligação à base de dados
+const connectDB = require('./config/db');
 
-// Carregar variáveis de ambiente e ligar BD
+// Load environment variables
 dotenv.config();
+
+// Connect to MongoDB Database
 connectDB();
 
 const app = express();
 
-// Permite receber JSON no body
-app.use(express.json());
+// ==========================================
+// 🌐 Global Middlewares
+// ==========================================
+app.use(cors()); // Enables Cross-Origin Resource Sharing
+app.use(express.json()); // Parses incoming requests with JSON payloads
 
-// --- AS NOSSAS ROTAS OFICIAIS ---
+// ==========================================
+// 🚀 API Routes
+// ==========================================
+// Authentication
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/artigos', require('./routes/artigos')); // A linha que devia estar a faltar!
-app.use('/api/artigos/:artigoId/comentarios', require('./routes/comentarios'));
-app.use('/api/comentarios', require('./routes/comentarios'));
 
-// Rota não encontrada (O erro 404 que estavas a ver)
+// Articles / Posts (Supports both Portuguese and English route aliases)
+app.use('/api/artigos', require('./routes/artigos'));
+app.use('/api/posts', require('./routes/artigos'));
+
+// Comments (Nested under articles & direct endpoints)
+app.use('/api/artigos/:artigoId/comentarios', require('./routes/comentarios'));
+app.use('/api/posts/:artigoId/comments', require('./routes/comentarios'));
+app.use('/api/comentarios', require('./routes/comentarios'));
+app.use('/api/comments', require('./routes/comentarios'));
+
+// ==========================================
+// 🛡️ Error & 404 Handling Middlewares
+// ==========================================
+// 404 Route Not Found
 app.use((req, res) => {
-    res.status(404).json({ erro: 'Rota não encontrada' });
+    res.status(404).json({ erro: 'Route not found' });
 });
 
-// Middleware de erros (Fase 5)
+// Centralized Error Handler (Catches CastError, 11000 duplicate keys, ValidationError)
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
 
-// Ligar o servidor
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor a correr na porta ${PORT}`);
+    console.log(`✅ Blog API running on port ${PORT} (http://localhost:${PORT})`);
 });

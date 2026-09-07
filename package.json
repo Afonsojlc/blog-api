@@ -1,19 +1,27 @@
-{
-  "name": "api_rest-sistema_de_blog_em_node",
+﻿{
+  "name": "blog-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "RESTful API for blog platform management with user authentication, role-based authorization, articles, and comments. Built with Node.js, Express, MongoDB (Mongoose), and JWT.",
+  "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
     "dev": "nodemon src/app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "nodejs",
+    "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
+    "rest-api",
+    "blog"
+  ],
+  "author": "Afonso José Lopes Carvalho",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-validator": "^7.3.2",

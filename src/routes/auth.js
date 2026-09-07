@@ -1,23 +1,36 @@
-const jwt = require('jsonwebtoken');
-const Utilizador = require('../models/Utilizador');
+﻿const express = require('express');
+const { body } = require('express-validator');
+const ctrl = require('../controllers/authController');
+const { proteger } = require('../middleware/auth');
+const validar = require('../middleware/validar');
 
-const proteger = async (req, res, next) => {
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1];
-    }
-    
-    if (!token) {
-        return res.status(401).json({ erro: 'Não autenticado' });
-    }
+const router = express.Router();
 
-    try {
-        const descodificado = jwt.verify(token, process.env.JWT_SECRET);
-        req.utilizador = await Utilizador.findById(descodificado.id);
-        next();
-    } catch (error) {
-        res.status(401).json({ erro: 'Não autenticado' });
-    }
-};
+// ==========================================
+// 🛡️ Request Validation Schemas
+// ==========================================
+const registerValidation = [
+    body('nome').trim().notEmpty().withMessage('Name is required'),
+    body('email').trim().isEmail().withMessage('Please provide a valid email address'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+];
 
-module.exports = proteger;
+const loginValidation = [
+    body('email').trim().isEmail().withMessage('Please provide a valid email address'),
+    body('password').notEmpty().withMessage('Password is required')
+];
+
+// ==========================================
+// 🔐 Authentication Endpoints
+// ==========================================
+
+// 1️⃣ POST /api/auth/register — Register a new user
+router.post('/register', registerValidation, validar, ctrl.register);
+
+// 2️⃣ POST /api/auth/login — Authenticate user and issue JWT token
+router.post('/login', loginValidation, validar, ctrl.login);
+
+// 3️⃣ GET /api/auth/me — Retrieve current authenticated user profile (Protected)
+router.get('/me', proteger, ctrl.getMe);
+
+module.exports = router;

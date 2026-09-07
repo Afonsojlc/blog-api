@@ -1,0 +1,386 @@
+﻿{
+  "info": {
+    "name": "Blog API",
+    "_postman_id": "8fa88ce3-4b68-450f-a912-321b1a03f44e",
+    "description": "Enterprise-grade Postman collection for the RESTful Blog API (Users, Articles, Comments, and Role-Based Authorization). Includes automatic token management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User (Author)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Afonso Carvalho\",\n  \"email\": \"afonso.blog@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registers a new user with default 'autor' role."
+          },
+          "response": []
+        },
+        {
+          "name": "Register User (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Admin Platform\",\n  \"email\": \"admin.blog@example.com\",\n  \"password\": \"AdminSecret123!\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registers an administrator with elevated permissions."
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json();",
+                  "    if (data.token) {",
+                  "        pm.collectionVariables.set(\"token\", data.token);",
+                  "        console.log(\"✅ JWT Token auto-saved to {{token}}\");",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"afonso.blog@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates user and saves JWT token to {{token}} collection variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile (Me)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Retrieves the currently authenticated user's profile."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Articles",
+      "item": [
+        {
+          "name": "List Published Articles (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/artigos?page=1&limit=10&categoria=tecnologia",
+              "host": ["{{baseUrl}}"],
+              "path": ["artigos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "categoria",
+                  "value": "tecnologia"
+                }
+              ]
+            },
+            "description": "Retrieves paginated list of published articles with optional category filter."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Article by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/artigos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["artigos", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ARTICLE_ID_HERE"
+                }
+              ]
+            },
+            "description": "Retrieves full details of a specific article by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Article (Protected)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Clean Architecture in Node.js & MongoDB\",\n  \"conteudo\": \"In this article, we examine how dividing an Express application into controllers, models, and middlewares fosters maintainability and scalability.\",\n  \"categoria\": \"tecnologia\",\n  \"publicado\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/artigos",
+              "host": ["{{baseUrl}}"],
+              "path": ["artigos"]
+            },
+            "description": "Publishes a new article. Author ID is automatically set from authenticated token."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Article (Author/Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Clean Architecture in Node.js & MongoDB (Revised)\",\n  \"conteudo\": \"Updated content with additional real-world case studies and benchmarks.\",\n  \"categoria\": \"tecnologia\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/artigos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["artigos", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ARTICLE_ID_HERE"
+                }
+              ]
+            },
+            "description": "Updates an article. Enforces ownership: only original author or admin can update."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Article (Author/Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/artigos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["artigos", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ARTICLE_ID_HERE"
+                }
+              ]
+            },
+            "description": "Deletes an article. Enforces ownership: only original author or admin can delete."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Comments",
+      "item": [
+        {
+          "name": "List Article Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/artigos/:artigoId/comentarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["artigos", ":artigoId", "comentarios"],
+              "variable": [
+                {
+                  "key": "artigoId",
+                  "value": "ARTICLE_ID_HERE"
+                }
+              ]
+            },
+            "description": "Lists all comments belonging to a specific article."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Comment (Protected)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conteudo\": \"Great writeup! The explanation of layered structure was crystal clear.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/artigos/:artigoId/comentarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["artigos", ":artigoId", "comentarios"],
+              "variable": [
+                {
+                  "key": "artigoId",
+                  "value": "ARTICLE_ID_HERE"
+                }
+              ]
+            },
+            "description": "Adds a comment to an article. Author is assigned from the JWT token."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment (Author/Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["comentarios", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "COMMENT_ID_HERE"
+                }
+              ]
+            },
+            "description": "Deletes a comment. Only the comment's author or an admin has permission."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
