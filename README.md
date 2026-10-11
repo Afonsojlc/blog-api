@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
 </p>
 
-A RESTful blogging API built with **Node.js**, **Express**, and **MongoDB (Mongoose)**. It provides user authentication, role-based access control (Author and Admin), paginated articles with category filters, and comments.
+> A RESTful blogging API built with **Node.js**, **Express**, and **MongoDB (Mongoose)**. It provides user authentication, role-based access control (Author and Admin), paginated articles with category filters, and comments.
 
 ---
 
